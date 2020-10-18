@@ -1,5 +1,5 @@
 import dash
 import dash_bootstrap_components as dbc
 
-app = dash.Dash(external_stylesheets=[dbc.themes.YETI])
+app = dash.Dash(external_stylesheets=[dbc.themes.FLATLY])
 server = app.server

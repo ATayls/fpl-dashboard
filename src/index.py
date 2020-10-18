@@ -6,10 +6,9 @@ from layouts import control, analysis
 from loading_loop import progress
 
 header = dbc.Row(
-    [
-        html.H1("FPL League Dashboard"),
-        html.Hr(),
-    ]
+    dbc.Col(
+        html.H1("FPL League Dashboard", className="bg-primary text-center text-white font-weight-bold"),
+    )
 )
 
 app.layout = dbc.Container(
