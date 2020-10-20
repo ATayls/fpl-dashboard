@@ -34,41 +34,47 @@ control = dbc.Row(
 
 analysis = html.Div(
     [
-        dbc.Row(
-            dbc.Col(
-                html.H1(id='league-name', className='text-center font-weight-bold'),
-                width={'size': 6, 'offset': 3}
-            ),
-        ),
-        dbc.Row(
-            dbc.Col(
-                dbc.Button(
-                    "Display League Table",
-                    id="collapse-button",
-                    className="mb-3 text-center",
-                    color="primary",
-                    block=True,
-                ),
-                width={'size': 4, 'offset': 4},
-            ),
-        ),
-        dbc.Row(
-            dbc.Col(
-                dbc.Collapse(
-                    dbc.Card(
-                        dash_table.DataTable(id='league-table')
+        html.Div(
+            [
+                dbc.Row(
+                    dbc.Col(
+                        html.H1(id='league-name', className='text-center font-weight-bold'),
+                        width={'size': 6, 'offset': 3}
                     ),
-                    id="collapse",
                 ),
-            ),
-            justify='center'
+                dbc.Row(
+                    dbc.Col(
+                        dbc.Button(
+                            "Display League Table",
+                            id="collapse-button",
+                            className="mb-3 text-center",
+                            color="primary",
+                            block=True,
+                        ),
+                        width={'size': 4, 'offset': 4},
+                    ),
+                ),
+                dbc.Row(
+                    dbc.Col(
+                        dbc.Collapse(
+                            dbc.Card(
+                                dash_table.DataTable(id='league-table')
+                            ),
+                            id="collapse",
+                        ),
+                    ),
+                    justify='center'
+                ),
+            ],
+            id='hidden-analysis-div',
+            style={'display': 'none'}
         ),
         dbc.Row(
             [
                 dbc.Tabs(
                     [
                         dbc.Tab(label="League Rankings", tab_id="rank"),
-                        dbc.Tab(label="Percentage Ownership", tab_id="prc_own"),
+                        dbc.Tab(label="Ownership", tab_id="prc_own"),
                         dbc.Tab(label="Transfers In", tab_id="trans_in"),
                         dbc.Tab(label="Transfers Out", tab_id="trans_out"),
                         dbc.Tab(label="Captains", tab_id="captains"),
@@ -84,8 +90,6 @@ analysis = html.Div(
             ]
         )
     ],
-    id='analysis-div',
-    style={'display': 'none'}
 )
 
 
@@ -102,7 +106,7 @@ def toggle_collapse(n, is_open):
 
 @app.callback(
     [Output("league-table", "data"), Output("league-table", "columns"),
-     Output("manager-list", "children"), Output("analysis-div", "style"),
+     Output("manager-list", "children"), Output("hidden-analysis-div", "style"),
      Output("league-name", "children")],
     [Input("run-button", "n_clicks"), State("league-id", "value")]
 )
