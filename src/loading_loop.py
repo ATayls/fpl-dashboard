@@ -41,6 +41,8 @@ def check(interval_trigger, latest_output, run_index):
 def run(list_input, run_index, session_id, df_path):
     if list_input is None:
         raise PreventUpdate
+    elif run_index >= len(list_input):
+        raise PreventUpdate
 
     entry_id = list_input[run_index]
     gw_list = [1, 2, 3]
