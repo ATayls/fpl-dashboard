@@ -32,6 +32,28 @@ control = dbc.Row(
     ]
 )
 
+graph_tabs = html.Div(
+    [
+        dbc.Tabs(
+            [
+                dbc.Tab(label="League Rankings", tab_id="rank"),
+                dbc.Tab(label="Ownership", tab_id="prc_own"),
+                dbc.Tab(label="Transfers In", tab_id="trans_in"),
+                dbc.Tab(label="Transfers Out", tab_id="trans_out"),
+                dbc.Tab(label="Captains", tab_id="captains"),
+                dbc.Tab(label="Manager Correlation", tab_id="man_corr"),
+                dbc.Tab(label="Manager Points", tab_id="man_box"),
+
+            ],
+            id="tabs",
+            active_tab="prc_own",
+            className='mt-3'
+        ),
+        html.Div(id="graph-tab-content"),
+    ]
+)
+
+
 analysis = html.Div(
     [
         html.Div(
@@ -73,20 +95,10 @@ analysis = html.Div(
             [
                 dbc.Tabs(
                     [
-                        dbc.Tab(label="League Rankings", tab_id="rank"),
-                        dbc.Tab(label="Ownership", tab_id="prc_own"),
-                        dbc.Tab(label="Transfers In", tab_id="trans_in"),
-                        dbc.Tab(label="Transfers Out", tab_id="trans_out"),
-                        dbc.Tab(label="Captains", tab_id="captains"),
-                        dbc.Tab(label="Manager Correlation", tab_id="man_corr"),
-                        dbc.Tab(label="Manager Points", tab_id="man_box"),
-
-                    ],
-                    id="tabs",
-                    active_tab="prc_own",
-                    className='mt-3'
+                        dbc.Tab(label="Season Overview", tab_id="season"),
+                        dbc.Tab(graph_tabs, label='Gameweek Analysis', tab_id='gws'),
+                    ]
                 ),
-                html.Div(id="tab-content"),
             ]
         )
     ],
