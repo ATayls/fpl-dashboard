@@ -4,9 +4,13 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 import dash_table
+import dash_core_components as dcc
+
+import pandas as pd
 
 from app import app
 from fpl_api_utils import league_dataframe
+from plots import create_graphs
 
 
 control = dbc.Row(
@@ -32,30 +36,46 @@ control = dbc.Row(
     ]
 )
 
-graph_tabs = html.Div(
+gameweek_tabs = html.Div(
+    [
+        dbc.Tabs(
+            [
+                dbc.Tab(label="Ownership", tab_id="prc-own"),
+                dbc.Tab(label="Transfers In", tab_id="trans-in"),
+                dbc.Tab(label="Transfers Out", tab_id="trans-out"),
+                dbc.Tab(label="Captains", tab_id="captains"),
+                dbc.Tab(label="Manager Correlation", tab_id="man-corr"),
+
+            ],
+            id="gameweek-tabs",
+            active_tab="prc-own",
+            className='mt-3'
+        ),
+        html.Div(id="gameweek-tab-content"),
+    ]
+)
+
+
+season_tabs = html.Div(
     [
         dbc.Tabs(
             [
                 dbc.Tab(label="League Rankings", tab_id="rank"),
-                dbc.Tab(label="Ownership", tab_id="prc_own"),
-                dbc.Tab(label="Transfers In", tab_id="trans_in"),
-                dbc.Tab(label="Transfers Out", tab_id="trans_out"),
-                dbc.Tab(label="Captains", tab_id="captains"),
-                dbc.Tab(label="Manager Correlation", tab_id="man_corr"),
-                dbc.Tab(label="Manager Points", tab_id="man_box"),
+                dbc.Tab(label="Manager Points", tab_id="man-box"),
 
             ],
-            id="tabs",
-            active_tab="prc_own",
+            id="season-tabs",
+            active_tab="rank",
             className='mt-3'
         ),
-        html.Div(id="graph-tab-content"),
+        html.Div(id="season-tab-content"),
     ]
 )
 
 
 analysis = html.Div(
     [
+        dcc.Store(id="fig_store"),
         html.Div(
             [
                 dbc.Row(
@@ -95,8 +115,8 @@ analysis = html.Div(
             [
                 dbc.Tabs(
                     [
-                        dbc.Tab(label="Season Overview", tab_id="season"),
-                        dbc.Tab(graph_tabs, label='Gameweek Analysis', tab_id='gws'),
+                        dbc.Tab(season_tabs, label="Season Overview", tab_id="season"),
+                        dbc.Tab(gameweek_tabs, label='Gameweek Analysis', tab_id='gws'),
                     ]
                 ),
             ]
@@ -130,3 +150,31 @@ def run(n_clicks, l_id):
     columns = [{"name": i, "id": i} for i in league_df.columns]
     manager_list = league_df['entry'].to_list()
     return league_df.to_dict('records'), columns, manager_list, {'display': 'block'}, name
+
+
+@app.callback(
+    [Output("season-tab-content", "children"), Output("gameweek-tab-content", "children")],
+    [Input("season-tabs", "active_tab"), Input("gameweek-tabs", "active_tab"), Input("fig_store", "data")],
+)
+def render_tab_content(active_season_tab, active_gw_tab, data):
+    """
+    This callback takes the 'active_tab' property as input, as well as the
+    stored graphs, and renders the tab content depending on what the value of
+    'active_tab' is.
+    """
+    if data is not None:
+        return dcc.Graph(figure=data[active_season_tab]), dcc.Graph(figure=data[active_gw_tab])
+
+    return "Data Not Generated", "Data Not Generated"
+
+
+@app.callback(
+    Output("fig_store", "data"),
+    [Input("load-complete", "children"), State("manager-df-path", "children")]
+)
+def create_figures(loaded, df_path):
+    if loaded:
+        stored_df = pd.read_feather(df_path)
+        return create_graphs(stored_df)
+    else:
+        raise PreventUpdate
