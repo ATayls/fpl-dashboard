@@ -34,18 +34,17 @@ def check(interval_trigger, latest_output, run_index):
 
 @app.callback(
     [Output("progress", "value"), Output("latest-output", "children"),
-     Output("manager-df-path", "children"), Output("progress", "children")],
-    [Input("manager-list", "children"), Input("run-index", "children"),
-     State("session_id", "children"), State("manager-df-path", "children")]
+     Output("manager-df-path", "data"), Output("progress", "children")],
+    [Input("manager-list", "data"), Input("run-index", "children"), State("gw-list", "data"),
+     State("session_id", "children"), State("manager-df-path", "data")]
 )
-def run(list_input, run_index, session_id, df_path):
+def run(list_input, run_index, gw_list, session_id, df_path):
     if list_input is None:
         raise PreventUpdate
     elif run_index >= len(list_input):
         raise PreventUpdate
 
     entry_id = list_input[run_index]
-    gw_list = [1, 2, 3]
 
     manager_df = scrape_manager_team(entry_id, gw_list)
     manager_df['manager'] = entry_id
@@ -64,7 +63,7 @@ def run(list_input, run_index, session_id, df_path):
 
 @app.callback(
     [Output("progress-interval", "disabled"), Output("load-complete", "children")],
-    [Input("manager-list", "children"), Input("progress", "value")]
+    [Input("manager-list", "data"), Input("progress", "value")]
 )
 def stop_interval(list_input, progress):
     if list_input is None:

@@ -9,14 +9,15 @@ import dash_core_components as dcc
 import pandas as pd
 
 from app import app
-from fpl_api_utils import league_dataframe
+from fpl_api_utils import league_dataframe, get_played_gameweeks
 from plots import create_graphs
 
 
 control = dbc.Row(
     [
-        html.Div(id='manager-list', style={'display': 'none'}),
-        html.Div(id='manager-df-path', style={'display': 'none'}),
+        dcc.Store(id='manager-list'),
+        dcc.Store(id='manager-df-path'),
+        dcc.Store(id='gw-list'),
         dbc.Card(
             dbc.CardBody(
                 [
@@ -138,8 +139,8 @@ def toggle_collapse(n, is_open):
 
 @app.callback(
     [Output("league-table", "data"), Output("league-table", "columns"),
-     Output("manager-list", "children"), Output("hidden-analysis-div", "style"),
-     Output("league-name", "children")],
+     Output("manager-list", "data"), Output("hidden-analysis-div", "style"),
+     Output("gw-list", "data"), Output("league-name", "children")],
     [Input("run-button", "n_clicks"), State("league-id", "value")]
 )
 def run(n_clicks, l_id):
@@ -149,7 +150,8 @@ def run(n_clicks, l_id):
     league_df, name = league_dataframe(l_id)
     columns = [{"name": i, "id": i} for i in league_df.columns]
     manager_list = league_df['entry'].to_list()
-    return league_df.to_dict('records'), columns, manager_list, {'display': 'block'}, name
+    gw_list = get_played_gameweeks()
+    return league_df.to_dict('records'), columns, manager_list, {'display': 'block'}, gw_list, name
 
 
 @app.callback(
@@ -170,7 +172,7 @@ def render_tab_content(active_season_tab, active_gw_tab, data):
 
 @app.callback(
     Output("fig_store", "data"),
-    [Input("load-complete", "children"), State("manager-df-path", "children")]
+    [Input("load-complete", "children"), State("manager-df-path", "data")]
 )
 def create_figures(loaded, df_path):
     if loaded:
