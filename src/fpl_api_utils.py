@@ -68,7 +68,11 @@ def scrape_manager_team(entry_id, gw_list):
         gw_data['active_chip'] = entry_picks['active_chip']
         entry_data_list.append(gw_data)
     output_df = pd.DataFrame.from_records(entry_data_list)
-    output_df.rename(columns={'P12': 'S1', 'P13': 'S2', 'P14': 'S3', 'P15': 'S4'})
+    output_df = output_df.rename(columns={'P12': 'S1',
+                                          'P13': 'S2',
+                                          'P14': 'S3',
+                                          'P15': 'S4',
+                                          'event': 'gw'})
 
     return output_df
 
