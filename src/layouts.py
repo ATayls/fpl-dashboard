@@ -13,29 +13,45 @@ from fpl_api_utils import league_dataframe, get_played_gameweeks
 from plots import create_graphs
 
 
-control = dbc.Row(
+control = html.Div(
     [
-        dcc.Store(id='manager-list'),
-        dcc.Store(id='manager-df-path'),
-        dcc.Store(id='gw-list'),
-        dbc.Card(
-            dbc.CardBody(
+        dbc.Row(
+            dbc.Col(
                 [
-                    dbc.Input(id="league-id", placeholder="Input League Id...", type="number"),
-                    dbc.Button(
-                        "Load League Data",
-                        color="primary",
-                        block=True,
-                        id="run-button",
+                    dcc.Loading(
+                        dcc.Store(id='manager-list'),
+                        id='loading-1', type="default", className='text-center'
                     ),
-                ]
+                    html.Br(),
+                    dcc.Store(id='manager-df-path'),
+                    dcc.Store(id='gw-list'),
+                ],
+                width=12
             ),
-            outline=False,
-            color='light',
-            className="w-100 mb-3",
         ),
+        dbc.Row(
+            [
+                dbc.Card(
+                    dbc.CardBody(
+                        [
+                            dbc.Input(id="league-id", placeholder="Input League Id...", type="number"),
+                            dbc.Button(
+                                "Load League Data",
+                                color="primary",
+                                block=True,
+                                id="run-button",
+                            ),
+                        ]
+                    ),
+                    outline=False,
+                    color='light',
+                    className="w-100 mb-3",
+                ),
+            ]
+        )
     ]
 )
+
 
 
 gameweek_tabs = html.Div(
