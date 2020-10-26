@@ -37,22 +37,28 @@ control = dbc.Row(
     ]
 )
 
+
 gameweek_tabs = html.Div(
     [
         dbc.Tabs(
             [
-                dbc.Tab(label="Ownership", tab_id="prc-own"),
-                dbc.Tab(label="Transfers In", tab_id="trans-in"),
-                dbc.Tab(label="Transfers Out", tab_id="trans-out"),
-                dbc.Tab(label="Captains", tab_id="captains"),
-                dbc.Tab(label="Manager Correlation", tab_id="man-corr"),
+                dbc.Tab(label="Ownership", tab_id="prc-own",
+                        labelClassName="bg-primary text-white"),
+                dbc.Tab(label="Transfers In", tab_id="trans-in",
+                        labelClassName="bg-primary text-white"),
+                dbc.Tab(label="Transfers Out", tab_id="trans-out",
+                        labelClassName="bg-primary text-white"),
+                dbc.Tab(label="Captains", tab_id="captains",
+                        labelClassName="bg-primary text-white"),
+                dbc.Tab(label="Manager Correlation", tab_id="man-corr",
+                        labelClassName="bg-primary text-white"),
 
             ],
             id="gameweek-tabs",
             active_tab="prc-own",
             className='mt-3'
         ),
-        html.Div(id="gameweek-tab-content"),
+        html.Div(id="gameweek-tab-content", className='mt-3'),
     ]
 )
 
@@ -61,15 +67,17 @@ season_tabs = html.Div(
     [
         dbc.Tabs(
             [
-                dbc.Tab(label="League Rankings", tab_id="rank"),
-                dbc.Tab(label="Manager Points", tab_id="man-box"),
+                dbc.Tab(label="League Rankings", tab_id="rank",
+                        labelClassName="bg-primary text-white"),
+                dbc.Tab(label="Manager Points", tab_id="man-box",
+                        labelClassName="bg-primary text-white"),
 
             ],
             id="season-tabs",
             active_tab="rank",
             className='mt-3'
         ),
-        html.Div(id="season-tab-content"),
+        html.Div(id="season-tab-content", className='mt-3'),
     ]
 )
 
@@ -91,7 +99,7 @@ analysis = html.Div(
                             "Display League Table",
                             id="collapse-button",
                             className="mb-3 text-center",
-                            color="primary",
+                            color="info",
                             block=True,
                         ),
                         width={'size': 4, 'offset': 4},
@@ -106,23 +114,29 @@ analysis = html.Div(
                             id="collapse",
                         ),
                     ),
-                    justify='center'
+                    justify='center',
+                    className='mb-3'
                 ),
             ],
             id='hidden-analysis-div',
             style={'display': 'none'}
         ),
         dbc.Row(
-            [
-                dbc.Tabs(
-                    [
-                        dbc.Tab(season_tabs, label="Season Overview", tab_id="season"),
-                        dbc.Tab(gameweek_tabs, label='Gameweek Analysis', tab_id='gws'),
-                    ]
-                ),
-            ]
+            dbc.Col(
+                [
+                    dbc.Tabs(
+                        [
+                            dbc.Tab(season_tabs, label="Season Overview", tab_id="season",
+                                    labelClassName="bg-primary text-white"),
+                            dbc.Tab(gameweek_tabs, label='Gameweek Analysis', tab_id='gws',
+                                    labelClassName="bg-primary text-white"),
+                        ],
+                        id="master-tabs"
+                    ),
+                ]
+            )
         )
-    ],
+    ]
 )
 
 
@@ -156,18 +170,24 @@ def run(n_clicks, l_id):
 
 @app.callback(
     [Output("season-tab-content", "children"), Output("gameweek-tab-content", "children")],
-    [Input("season-tabs", "active_tab"), Input("gameweek-tabs", "active_tab"), Input("fig_store", "data")],
+    [Input("season-tabs", "active_tab"), Input("gameweek-tabs", "active_tab"),
+     Input("master-tabs", "active_tab"), Input("fig_store", "data")],
 )
-def render_tab_content(active_season_tab, active_gw_tab, data):
+def render_tab_content(active_season_tab, active_gw_tab, master_tab, data):
     """
     This callback takes the 'active_tab' property as input, as well as the
     stored graphs, and renders the tab content depending on what the value of
     'active_tab' is.
     """
-    if data is not None:
-        return dcc.Graph(figure=data[active_season_tab]), dcc.Graph(figure=data[active_gw_tab])
+    if data is None:
+        return "Data Not Generated", "Data Not Generated"
 
-    return "Data Not Generated", "Data Not Generated"
+    if (master_tab == "gws") and (active_gw_tab in data):
+        return "Unrendered", dcc.Graph(figure=data[active_gw_tab])
+    elif (master_tab == "season") and (active_season_tab in data):
+        return dcc.Graph(figure=data[active_season_tab]), "Unrendered"
+    else:
+        return "Graph Not Generated", "Graph Not Generated"
 
 
 @app.callback(
