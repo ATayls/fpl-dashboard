@@ -52,6 +52,7 @@ def run(list_input, run_index, gw_list, session_id, df_path):
     if df_path is not None:
         stored_df = pd.read_feather(df_path)
         manager_df = pd.concat([stored_df, manager_df]).reset_index(drop=True)
+        manager_df = manager_df.drop_duplicates()
     else:
         df_path = DATA_STORE.joinpath(session_id, 'manager_df.feather')
 
