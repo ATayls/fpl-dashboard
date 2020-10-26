@@ -14,6 +14,13 @@ def league_ranking(running_rank):
     return fig
 
 
+def manager_box_plot(manager_df):
+    fig = px.box(manager_df[['team_name', 'points']], x="points", y="team_name",
+                 orientation='h')
+    fig.update_yaxes(type='category')
+    return fig
+
+
 def create_ranking_df(manager_df):
     def id_to_name(m_id):
         return manager_df[manager_df['manager'] == m_id]['team_name'].iloc[0]
@@ -32,4 +39,5 @@ def create_ranking_df(manager_df):
 def create_graphs(manager_df):
     running_rank, gw_rank = create_ranking_df(manager_df)
     rank_fig = league_ranking(running_rank)
-    return {'rank': rank_fig}
+    box_fig = manager_box_plot(manager_df)
+    return {'rank': rank_fig, 'points-box': box_fig}
