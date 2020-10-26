@@ -163,7 +163,7 @@ def run(n_clicks, l_id):
         raise PreventUpdate
     league_df, name = league_dataframe(l_id)
     columns = [{"name": i, "id": i} for i in league_df.columns]
-    manager_list = league_df['entry'].to_list()
+    manager_list = [x for x in zip(league_df['entry'].to_list(), league_df['entry_name'].to_list())]
     gw_list = get_played_gameweeks()
     return league_df.to_dict('records'), columns, manager_list, {'display': 'block'}, gw_list, name
 

@@ -44,10 +44,11 @@ def run(list_input, run_index, gw_list, session_id, df_path):
     elif run_index >= len(list_input):
         raise PreventUpdate
 
-    entry_id = list_input[run_index]
+    entry_id, entry_name = list_input[run_index]
 
     manager_df = scrape_manager_team(entry_id, gw_list)
     manager_df['manager'] = entry_id
+    manager_df['team_name'] = entry_name
 
     if df_path is not None:
         stored_df = pd.read_feather(df_path)

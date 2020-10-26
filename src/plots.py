@@ -15,13 +15,17 @@ def league_ranking(running_rank):
 
 
 def create_ranking_df(manager_df):
+    def id_to_name(m_id):
+        return manager_df[manager_df['manager'] == m_id]['team_name'].iloc[0]
     # Get manager rankings
-    running_rank = (manager_df[['manager', 'gw', 'total_points']].set_index('manager')
+    running_rank = (manager_df[['manager', 'gw', 'total_points', 'team_name']].set_index('manager')
                     .pivot(columns='gw', values='total_points')
                     .rank(ascending=False, method='first'))
     gw_rank = (manager_df[['manager', 'gw', 'points']].set_index('manager')
                .pivot(columns='gw', values='points')
                .rank(ascending=False, method='first'))
+    running_rank.index = running_rank.index.map(id_to_name)
+    gw_rank.index = gw_rank.index.map(id_to_name)
     return running_rank, gw_rank
 
 
