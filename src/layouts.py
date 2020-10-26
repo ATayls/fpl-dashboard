@@ -161,7 +161,9 @@ def run(n_clicks, l_id):
     ctx = callback_context
     if not ctx.triggered:
         raise PreventUpdate
-    league_df, name = league_dataframe(l_id)
+    if l_id is None:
+        raise PreventUpdate
+    league_df, name = league_dataframe(l_id, manager_limit=100)
     columns = [{"name": i, "id": i} for i in league_df.columns]
     manager_list = [x for x in zip(league_df['entry'].to_list(), league_df['entry_name'].to_list())]
     gw_list = get_played_gameweeks()
