@@ -32,6 +32,17 @@ def ownership_bar(ownership_df, gw):
     return fig
 
 
+def captaincy_plot(manager_df, gw):
+    prc_captain = manager_df[manager_df['gw'] == gw]['captain'].value_counts()
+    prc_captain = prc_captain / prc_captain.sum() * 100
+    fig = go.Figure(go.Bar(
+                    x=prc_captain,
+                    y=prc_captain.index,
+                    orientation='h'))
+    fig.update_yaxes(type='category')
+    return fig
+
+
 def create_ranking_df(manager_df):
     def id_to_name(m_id):
         return manager_df[manager_df['manager'] == m_id]['team_name'].iloc[0]
@@ -77,4 +88,5 @@ def create_graphs(manager_df, gw):
     rank_fig = league_ranking(running_rank)
     box_fig = manager_box_plot(manager_df)
     own_fig = ownership_bar(own_df, gw)
-    return {'rank': rank_fig, 'points-box': box_fig, 'prc-own':own_fig}
+    cap_fig = captaincy_plot(manager_df, gw)
+    return {'rank': rank_fig, 'points-box': box_fig, 'prc-own': own_fig, 'captains': cap_fig}
