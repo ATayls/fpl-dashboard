@@ -24,14 +24,30 @@ def manager_box_plot(manager_df):
     return fig
 
 
-def transfers_in_bar(ownership_df, gw):
+def transfers_bar(ownership_df, gw, in_out="in"):
     total_transfers = ownership_df.diff(axis=1).fillna(0.0)
-    total_transfers = total_transfers[total_transfers[f'gw{gw}'] > 0].sort_values(by=f'gw{gw}')
+    if in_out == "in":
+        total_transfers = total_transfers[total_transfers[f'gw{gw}'] > 0].sort_values(by=f'gw{gw}')
+    elif in_out == "out":
+        total_transfers = total_transfers[total_transfers[f'gw{gw}'] < 0].sort_values(by=f'gw{gw}')
+        total_transfers = -1*total_transfers
+    else:
+        raise ValueError(f"{in_out} unrecognised")
+
     fig = go.Figure(go.Bar(
                     x=total_transfers[f'gw{gw}'],
                     y=total_transfers.index,
                     orientation='h'))
     fig.update_yaxes(type='category')
+    return fig
+
+
+def manager_corr_heatmap(manager_corr_matrix):
+    fig = px.imshow(manager_corr_matrix.values,
+                    labels=dict(x="Team Name", y="Team Name", color="Team Correlation"),
+                    x=manager_corr_matrix.columns,
+                    y=manager_corr_matrix.index
+                    )
     return fig
 
 
@@ -70,6 +86,29 @@ def create_ranking_df(manager_df):
     gw_rank.index = gw_rank.index.map(id_to_name)
     return running_rank, gw_rank
 
+
+def index_by_element(manager_df, include_subs=True):
+    """
+    Transform main dataframe to be indexed by element
+    :param manager_df:
+    :return:
+    """
+    if include_subs:
+        element_df = manager_df.loc[:, 'P1':'S4'].apply(pd.value_counts, axis=1).fillna(0.0)
+    else:
+        element_df = manager_df.loc[:, 'P1':'P11'].apply(pd.value_counts, axis=1).fillna(0.0)
+    element_df = pd.concat([manager_df[['manager', 'team_name', 'gw']], element_df], axis=1)
+    return element_df
+
+
+def create_corr_matrices(element_df, gw):
+    gw_element_df = element_df[element_df['gw'] == gw].drop(columns='gw').drop(columns='manager')
+    gw_element_df = gw_element_df.loc[:, (gw_element_df.sum(axis=0) != 0)].set_index('team_name')
+    player_corr_matrix = gw_element_df.corr()
+    manager_corr_matrix = gw_element_df.transpose().corr()
+    return player_corr_matrix, manager_corr_matrix
+
+
 def ownership(manager_df, prc=True, include_subs=True):
     """
     From manager_df, calculate the element percentage ownership by week
@@ -98,9 +137,16 @@ def ownership(manager_df, prc=True, include_subs=True):
 def create_graphs(manager_df, gw):
     running_rank, gw_rank = create_ranking_df(manager_df)
     own_df = ownership(manager_df)
+    element_df = index_by_element(manager_df)
+    player_corr, manager_corr = create_corr_matrices(element_df, gw)
+
     rank_fig = league_ranking(running_rank)
     box_fig = manager_box_plot(manager_df)
     own_fig = ownership_bar(own_df, gw)
     cap_fig = captaincy_plot(manager_df, gw)
-    trans_in = transfers_in_bar(own_df, gw)
-    return {'rank': rank_fig, 'points-box': box_fig, 'prc-own': own_fig, 'captains': cap_fig, 'trans-in': trans_in}
+    trans_in = transfers_bar(own_df, gw, "in")
+    trans_out = transfers_bar(own_df, gw, "out")
+    man_corr_fig = manager_corr_heatmap(manager_corr)
+
+    return {'rank': rank_fig, 'points-box': box_fig, 'prc-own': own_fig, 'captains': cap_fig,
+            'trans-in': trans_in, 'trans-out': trans_out, 'man-corr': man_corr_fig}
