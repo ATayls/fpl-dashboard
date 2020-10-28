@@ -3,7 +3,9 @@ import plotly.graph_objects as go
 
 import pandas as pd
 
+
 def league_ranking(running_rank):
+    running_rank = running_rank.sort_values(by=running_rank.columns[-1], ascending=True)
     # League rank plot
     fig = go.Figure()
     for row in running_rank.iterrows():
