@@ -214,6 +214,6 @@ def render_tab_content(active_season_tab, active_gw_tab, master_tab, data):
 def create_figures(loaded, df_path):
     if loaded:
         stored_df = pd.read_feather(df_path)
-        return create_graphs(stored_df, gw=1)
+        return create_graphs(stored_df, gw=2)
     else:
         raise PreventUpdate

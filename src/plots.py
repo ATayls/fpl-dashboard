@@ -22,6 +22,17 @@ def manager_box_plot(manager_df):
     return fig
 
 
+def transfers_in_bar(ownership_df, gw):
+    total_transfers = ownership_df.diff(axis=1).fillna(0.0)
+    total_transfers = total_transfers[total_transfers[f'gw{gw}'] > 0].sort_values(by=f'gw{gw}')
+    fig = go.Figure(go.Bar(
+                    x=total_transfers[f'gw{gw}'],
+                    y=total_transfers.index,
+                    orientation='h'))
+    fig.update_yaxes(type='category')
+    return fig
+
+
 def ownership_bar(ownership_df, gw):
     gw_ownership = ownership_df[ownership_df[f'gw{gw}'] > 0].sort_values(by=f'gw{gw}')
     fig = go.Figure(go.Bar(
@@ -89,4 +100,5 @@ def create_graphs(manager_df, gw):
     box_fig = manager_box_plot(manager_df)
     own_fig = ownership_bar(own_df, gw)
     cap_fig = captaincy_plot(manager_df, gw)
-    return {'rank': rank_fig, 'points-box': box_fig, 'prc-own': own_fig, 'captains': cap_fig}
+    trans_in = transfers_in_bar(own_df, gw)
+    return {'rank': rank_fig, 'points-box': box_fig, 'prc-own': own_fig, 'captains': cap_fig, 'trans-in': trans_in}
