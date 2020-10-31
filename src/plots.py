@@ -61,12 +61,10 @@ def ownership_bar(ownership_df, gw):
     return fig
 
 
-def captaincy_plot(manager_df, gw):
-    prc_captain = manager_df[manager_df['gw'] == gw]['captain'].value_counts()
-    prc_captain = prc_captain / prc_captain.sum() * 100
+def captaincy_plot(captains_df):
     fig = go.Figure(go.Bar(
-                    x=prc_captain,
-                    y=prc_captain.index,
+                    x=captains_df,
+                    y=captains_df.index,
                     orientation='h'))
     fig.update_yaxes(type='category')
     return fig
@@ -134,16 +132,23 @@ def ownership(manager_df, prc=True, include_subs=True):
     return prc_ownership_df
 
 
-def create_graphs(manager_df, gw):
+def create_graphs(manager_df, players_df, gw):
+    def id_to_name(player_id):
+        return players_df[players_df['id'] == player_id]['web_name'].values[0]
+
     running_rank, gw_rank = create_ranking_df(manager_df)
     own_df = ownership(manager_df)
+    own_df.index = own_df.index.map(id_to_name)
     element_df = index_by_element(manager_df)
+    element_df = element_df.rename(columns={x: id_to_name(x) for x in element_df.columns[3:]})
     player_corr, manager_corr = create_corr_matrices(element_df, gw)
+    captains_df = manager_df[manager_df['gw'] == gw]['captain'].apply(id_to_name).value_counts()
+    captains_df = captains_df / captains_df.sum() * 100
 
     rank_fig = league_ranking(running_rank)
     box_fig = manager_box_plot(manager_df)
     own_fig = ownership_bar(own_df, gw)
-    cap_fig = captaincy_plot(manager_df, gw)
+    cap_fig = captaincy_plot(captains_df)
     trans_in = transfers_bar(own_df, gw, "in")
     trans_out = transfers_bar(own_df, gw, "out")
     man_corr_fig = manager_corr_heatmap(manager_corr)

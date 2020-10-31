@@ -209,11 +209,14 @@ def render_tab_content(active_season_tab, active_gw_tab, master_tab, data):
 
 @app.callback(
     Output("fig_store", "data"),
-    [Input("load-complete", "children"), State("manager-df-path", "data")]
+    [Input("load-complete", "children"),
+     State("fpl-data-paths", "data"),
+     State("manager-df-path", "data")]
 )
-def create_figures(loaded, df_path):
+def create_figures(loaded, data_paths, df_path):
     if loaded:
         stored_df = pd.read_feather(df_path)
-        return create_graphs(stored_df, gw=2)
+        players_df = pd.read_feather(data_paths['players'])
+        return create_graphs(stored_df, players_df, gw=2)
     else:
         raise PreventUpdate

@@ -24,6 +24,11 @@ def get_league_data(leagueId, page_num=1):
     return _fpl_url_request(url)
 
 
+def get_data():
+    url = fpl_base_url + '/bootstrap-static/'
+    return _fpl_url_request(url)
+
+
 def get_fixtures_data():
     url = fpl_base_url + "/fixtures/"
     return _fpl_url_request(url)
@@ -86,9 +91,18 @@ def get_played_gameweeks(including_active=False):
         gw_list = grby[grby['finished'] == 1].index.to_list()
     return [int(gw) for gw in gw_list]
 
+
+def get_bootstrap_static_dataframes():
+    data = get_data()
+    teams_df = pd.DataFrame.from_records(data['teams'])
+    players_df = pd.DataFrame.from_records(data['elements'])
+    events_df = pd.DataFrame.from_records(data['events'])
+    return players_df, teams_df, events_df
+
 if __name__ == '__main__':
 
     fixtures = get_fixtures_data()
+    players, teams, events = get_bootstrap_static_dataframes()
     df_league = league_dataframe(261, 100)
     df_entry = scrape_manager_team(164, [1, 2, 3])
     df_entry.to_feather('test')

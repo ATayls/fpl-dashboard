@@ -4,11 +4,14 @@ import shutil
 
 import dash_html_components as html
 import dash_bootstrap_components as dbc
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
+from dash.exceptions import PreventUpdate
+import dash_core_components as dcc
 
 from app import app, DATA_STORE
 from layouts import control, analysis
 from loading_loop import progress
+from fpl_api_utils import get_bootstrap_static_dataframes
 
 header = dbc.Row(
     dbc.Col(
@@ -20,6 +23,7 @@ app.layout = dbc.Container(
     [
         html.Div(str(uuid.uuid4()), id='session_id', style={'display': 'none'}),
         html.Div(id='data_store_success', style={'display': 'none'}),
+        dcc.Store(id="fpl-data-paths"),
         header,
         control,
         progress,
@@ -51,6 +55,30 @@ def create_session_store(session_id):
         return True
     else:
         return False
+
+
+@app.callback(
+    Output("fpl-data-paths", "data"),
+    [Input('data_store_success', "children"), State("session_id", "children")],
+    prevent_initial_call=True
+)
+def retrieve_player_data(trigger, session_id):
+    if trigger is None:
+        raise PreventUpdate
+    paths = {
+        'players': DATA_STORE.joinpath(session_id, 'players.feather'),
+        'teams': DATA_STORE.joinpath(session_id, 'teams.feather'),
+        'events': DATA_STORE.joinpath(session_id, 'events.feather'),
+    }
+    if not all([path.exists() for path in paths.values()]):
+        players, teams, events = get_bootstrap_static_dataframes()
+
+        players.to_feather(paths['players'])
+        teams.to_feather(paths['teams'])
+        events.to_feather(paths['events'])
+
+    return {item[0]: str(item[1]) for item in paths.items()}
+
 
 
 if __name__ == '__main__':
