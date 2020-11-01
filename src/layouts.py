@@ -55,6 +55,14 @@ control = html.Div(
 
 gameweek_tabs = html.Div(
     [
+        dbc.Form(
+            [
+                dbc.Label("Select Gameweek", html_for="gw-select"),
+                dbc.Select(id="gw-select", className="ml-3", placeholder="Select Gameweek")
+            ],
+            inline=True,
+            className="mt-3"
+        ),
         dbc.Tabs(
             [
                 dbc.Tab(label="Ownership", tab_id="prc-own",
@@ -181,7 +189,7 @@ def run(n_clicks, l_id):
     league_df, name = league_dataframe(l_id, manager_limit=100)
     columns = [{"name": i, "id": i} for i in league_df.columns]
     manager_list = [x for x in zip(league_df['entry'].to_list(), league_df['entry_name'].to_list())]
-    gw_list = get_played_gameweeks()
+    gw_list = get_played_gameweeks(including_active=True)
     return league_df.to_dict('records'), columns, manager_list, {'display': 'block'}, gw_list, name
 
 
@@ -210,13 +218,30 @@ def render_tab_content(active_season_tab, active_gw_tab, master_tab, data):
 @app.callback(
     Output("fig_store", "data"),
     [Input("load-complete", "children"),
+     Input("gw-select", "value"),
      State("fpl-data-paths", "data"),
      State("manager-df-path", "data")]
 )
-def create_figures(loaded, data_paths, df_path):
+def create_figures(loaded, gw, data_paths, df_path):
     if loaded:
         stored_df = pd.read_feather(df_path)
         players_df = pd.read_feather(data_paths['players'])
-        return create_graphs(stored_df, players_df, gw=2)
+        return create_graphs(stored_df, players_df, int(gw))
+    else:
+        raise PreventUpdate
+
+
+@app.callback(
+    [Output("gw-select", "options"), Output("gw-select", "value")],
+    [Input("gw-list", "data"), State("gw-select","value")]
+)
+def populate_gw_select(gw_list, current_val):
+    if isinstance(gw_list, list):
+        options = [{'label': f'Gameweek {x}', 'value': str(x)} for x in gw_list]
+        if current_val is None:
+            value = gw_list[-1]
+        else:
+            value = current_val
+        return options, value
     else:
         raise PreventUpdate
