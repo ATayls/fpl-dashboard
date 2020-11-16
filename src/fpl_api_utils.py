@@ -15,7 +15,7 @@ def _fpl_url_request(url):
         except:
             time.sleep(5)
     if response.status_code != 200:
-        raise Exception("Response was code " + str(response.status_code))
+        response.raise_for_status()
     data = json.loads(response.text)
     return data
 

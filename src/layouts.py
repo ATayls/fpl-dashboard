@@ -5,8 +5,10 @@ from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 import dash_table
 import dash_core_components as dcc
+from dash.dash import no_update
 
 import pandas as pd
+from requests import HTTPError
 
 from app import app
 from fpl_api_utils import league_dataframe, get_played_gameweeks
@@ -177,20 +179,29 @@ def toggle_collapse(n, is_open):
 @app.callback(
     [Output("league-table", "data"), Output("league-table", "columns"),
      Output("manager-list", "data"), Output("hidden-analysis-div", "style"),
-     Output("gw-list", "data"), Output("league-name", "children")],
+     Output("gw-list", "data"), Output("league-name", "children"),
+     Output("league-id", "valid"), Output("league-id", "invalid")],
     [Input("run-button", "n_clicks"), State("league-id", "value")]
 )
 def run(n_clicks, l_id):
-    ctx = callback_context
-    if not ctx.triggered:
-        raise PreventUpdate
+    """
+    Main entry callback. Triggered when user inputs league id and clicks run.
+    :param n_clicks: Count of run clicks - used as callback trigger
+    :param l_id: league id input in input field
+    :return:
+    """
     if l_id is None:
         raise PreventUpdate
-    league_df, name = league_dataframe(l_id, manager_limit=100)
+    try:
+        league_df, name = league_dataframe(l_id, manager_limit=100)
+    except HTTPError:
+        return no_update, no_update, no_update, no_update, no_update, no_update, False, True
+
     columns = [{"name": i, "id": i} for i in league_df.columns]
     manager_list = [x for x in zip(league_df['entry'].to_list(), league_df['entry_name'].to_list())]
     gw_list = get_played_gameweeks(including_active=True)
-    return league_df.to_dict('records'), columns, manager_list, {'display': 'block'}, gw_list, name
+
+    return league_df.to_dict('records'), columns, manager_list, {'display': 'block'}, gw_list, name, True, False
 
 
 @app.callback(
