@@ -5,6 +5,11 @@ from analysis import create_ranking_df, ownership, index_by_element, create_corr
 
 
 def league_ranking(running_rank):
+    """
+    Plot to show manager overall rankings over time.
+    :param running_rank: df
+    :return: plotly fig
+    """
     running_rank = running_rank.sort_values(by=running_rank.columns[-1], ascending=True)
     # League rank plot
     fig = go.Figure()
@@ -18,6 +23,11 @@ def league_ranking(running_rank):
 
 
 def manager_box_plot(manager_df):
+    """
+    Plot to show manager points box plots.
+    :param manager_df: df
+    :return: plotly fig
+    """
     fig = px.box(manager_df[['team_name', 'points']], x="points", y="team_name",
                  orientation='h')
     fig.update_yaxes(type='category')
@@ -25,6 +35,13 @@ def manager_box_plot(manager_df):
 
 
 def transfers_bar(ownership_df, gw, in_out="in"):
+    """
+    Horizontal bar chart to show most transferred players. in_out param to select transfers in or transfers out.
+    :param ownership_df:player ownership dataframe
+    :param gw: gameweek
+    :param in_out: transfer direction
+    :return: plotly fig
+    """
     total_transfers = ownership_df.diff(axis=1).fillna(0.0)
     if in_out == "in":
         total_transfers = total_transfers[total_transfers[f'gw{gw}'] > 0].sort_values(by=f'gw{gw}')
@@ -43,6 +60,11 @@ def transfers_bar(ownership_df, gw, in_out="in"):
 
 
 def manager_corr_heatmap(manager_corr_matrix):
+    """
+    Heatmap of correlation between managers - which managers team selections are most correlated
+    :param manager_corr_matrix: correlation matrix
+    :return: plotly fig
+    """
     fig = px.imshow(manager_corr_matrix.values,
                     labels=dict(x="Team Name", y="Team Name", color="Team Correlation"),
                     x=manager_corr_matrix.columns,
@@ -52,6 +74,12 @@ def manager_corr_heatmap(manager_corr_matrix):
 
 
 def ownership_bar(ownership_df, gw):
+    """
+    Horizontal Bar chart plot of most owned players in league
+    :param ownership_df: player ownership dataframe
+    :param gw: input gameweek
+    :return: plotly fig
+    """
     gw_ownership = ownership_df[ownership_df[f'gw{gw}'] > 0].sort_values(by=f'gw{gw}')
     fig = go.Figure(go.Bar(
                     x=gw_ownership[f'gw{gw}'],
@@ -62,6 +90,11 @@ def ownership_bar(ownership_df, gw):
 
 
 def captaincy_plot(captains_df):
+    """
+    Horizontal Bar chart plot of most captained players in league
+    :param captains_df:
+    :return:
+    """
     fig = go.Figure(go.Bar(
                     x=captains_df,
                     y=captains_df.index,
@@ -71,6 +104,13 @@ def captaincy_plot(captains_df):
 
 
 def create_graphs(manager_df, players_df, gw):
+    """
+    Create all plotly fig objects and return in dictionary
+    :param manager_df: Manager dataframe
+    :param players_df: players dataframe
+    :param gw: selected gameweek
+    :return: dict
+    """
     def id_to_name(player_id):
         return players_df[players_df['id'] == player_id]['web_name'].values[0]
 

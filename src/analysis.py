@@ -29,6 +29,14 @@ def ownership(manager_df, prc=True, include_subs=True):
 
 
 def create_corr_matrices(element_df, gw):
+    """
+    Given the manager team selection df indexed by element, create correlation matrices for both player selection
+    correlation and manager correlation
+     i.e which players are often selected alongside others, and which managers teams are most correlated.
+    :param element_df:
+    :param gw:
+    :return:
+    """
     gw_element_df = element_df[element_df['gw'] == gw].drop(columns='gw').drop(columns='manager')
     gw_element_df = gw_element_df.loc[:, (gw_element_df.sum(axis=0) != 0)].set_index('team_name')
     player_corr_matrix = gw_element_df.corr()
@@ -52,6 +60,11 @@ def index_by_element(manager_df, include_subs=True):
 
 
 def create_ranking_df(manager_df):
+    """
+    Create ranking dataframes given the manager dataframe. One of overall rank and one for rank in each gameweek.
+    :param manager_df:
+    :return:
+    """
     def id_to_name(m_id):
         return manager_df[manager_df['manager'] == m_id]['team_name'].iloc[0]
 
