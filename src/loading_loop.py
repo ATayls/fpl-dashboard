@@ -3,6 +3,7 @@ import dash_html_components as html
 import dash_core_components as dcc
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
+from dash import callback_context
 
 import pandas as pd
 
@@ -11,8 +12,8 @@ from fpl_api_utils import scrape_manager_team
 
 progress = html.Div(
     [
-        dcc.Interval(id="progress-interval", interval=0.5*1000, disabled=False),
-        html.Div(id="latest-output", style={'display': 'none'}),
+        dcc.Interval(id="progress-interval", interval=0.5*1000, disabled=True),
+        html.Div(id="latest-processed-index", style={'display': 'none'}),
         html.Div(id="progress-output", style={'display': 'none'}),
         html.Div(0, id="run-index", style={'display': 'none'}),
         html.Div(id="load-complete", style={'display': 'none'}),
@@ -23,22 +24,48 @@ progress = html.Div(
 
 @app.callback(
     Output("run-index", "children"),
-    [Input("progress-interval", "n_intervals"), State("latest-output", "children"), State("run-index", "children")]
+    [Input("progress-interval", "n_intervals"), Input("manager-list", "data"),
+     State("latest-processed-index", "children"), State("run-index", "children")]
 )
-def check(interval_trigger, latest_output, run_index):
-    if run_index != latest_output:
+def iterate_index(interval_trigger, list_input, latest_processed_index, run_index):
+    """
+    Callback to iterate through the list indices. Steps to next index when latest_processed_index from loop_contents is
+    equal to the current run index. Triggered regularly by interval component to check if loop contents has completed
+    and ready to receive next run_index.
+    :param interval_trigger: interval component triggering the callback at regular intervals.
+    :param list_input: used to trigger when user submits new manager list. Resets run_index to zero
+    :param latest_processed_index: most recent list index loop contents has successfull processed
+    :param run_index: current run index
+    :return:
+    """
+    ctx = callback_context
+    if ctx.triggered[0]['prop_id'] == "manager-list.data":
+        return 0
+    elif run_index != latest_processed_index:
         raise PreventUpdate
     else:
         return run_index+1
 
 
 @app.callback(
-    [Output("progress", "value"), Output("latest-output", "children"),
+    [Output("progress", "value"), Output("latest-processed-index", "children"),
      Output("manager-df-path", "data"), Output("progress", "children")],
-    [Input("manager-list", "data"), Input("run-index", "children"), State("gw-list", "data"),
+    [Input("run-index", "children"), State("manager-list", "data"), State("gw-list", "data"),
      State("session_id", "children"), State("manager-df-path", "data")]
 )
-def run(list_input, run_index, gw_list, session_id, df_path):
+def loop_contents(run_index, list_input, gw_list, session_id, df_path):
+    """
+    Main processing contents of loop.
+    Given an index 'run_index' to the list 'list_input', extracts from list and processes.
+    Scrapes manager team and saves to feather.
+    Updates progress bar.
+    :param run_index:
+    :param list_input:
+    :param gw_list:
+    :param session_id:
+    :param df_path:
+    :return:
+    """
     if list_input is None:
         raise PreventUpdate
     elif run_index >= len(list_input):
@@ -60,18 +87,31 @@ def run(list_input, run_index, gw_list, session_id, df_path):
     manager_df.to_feather(df_path)
     progress_val = ((run_index+1)/len(list_input))*100
     progress_str = f"{run_index+1}/{len(list_input)}" if progress_val >= 5 else ""
-    return progress_val, run_index, str(df_path), progress_str
+    latest_processed_index = run_index
+    return progress_val, latest_processed_index, str(df_path), progress_str
 
 
 @app.callback(
     [Output("progress-interval", "disabled"), Output("load-complete", "children")],
     [Input("manager-list", "data"), Input("progress", "value")]
 )
-def stop_interval(list_input, progress):
+def start_stop_interval(list_input, progress):
+    """
+    Callback to start/stop the interval component which controls the run_index iteration.
+    :param list_input: manager list
+    :param progress: progress bar value
+    :return:
+    """
+    ctx = callback_context
+    if ctx.triggered[0]['prop_id'] == "manager-list.data":
+        return False, False
+
     if list_input is None:
         raise PreventUpdate
 
     if progress >= 100:
         return True, True
-    else:
+    elif progress < 100:
         return False, False
+    else:
+        raise PreventUpdate
