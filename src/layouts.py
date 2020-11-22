@@ -12,46 +12,47 @@ from requests import HTTPError
 
 from app import app
 from fpl_api_utils import league_dataframe, get_played_gameweeks
+from loading_loop import progress
 from plots import create_graphs
 
+about_tab = dbc.Card(
+    dbc.CardBody(
+        [
+            html.H4("League Dashboard"),
+            html.P(""" This dashboard aims to give you a more complete overview of the activity in your FPL
+            league. Input your league id on the Input Tab to load the manager data into the dashboard.
+            To find your league id: """),
+            html.P("1. Log into the Official Fantasy Premier League site. Link below"),
+            html.P("2. Click on the 'League' of interest."),
+            html.P("3. Look for the number in the URL of that webpage. That is the unique FPL league ID."),
+            dbc.Button("FPL Leagues", color="info", external_link=True, target="_blank", className="text-center",
+                       href="https://fantasy.premierleague.com/leagues")
+        ]
+    )
+)
 
-control = html.Div(
-    [
-        dbc.Row(
-            dbc.Col(
-                [
-                    dcc.Loading(
-                        dcc.Store(id='manager-list'),
-                        id='loading-1', type="default", className='text-center'
-                    ),
-                    html.Br(),
-                    dcc.Store(id='manager-df-path'),
-                    dcc.Store(id='gw-list'),
-                ],
-                width=12
+input_tab = dbc.Card(
+    dbc.CardBody(
+        [
+            dcc.Loading(
+                dcc.Store(id='manager-list'),
+                id='loading-1', type="default", className='text-center'
             ),
-        ),
-        dbc.Row(
-            [
-                dbc.Card(
-                    dbc.CardBody(
-                        [
-                            dbc.Input(id="league-id", placeholder="Input League Id...", type="number"),
-                            dbc.Button(
-                                "Load League Data",
-                                color="primary",
-                                block=True,
-                                id="run-button",
-                            ),
-                        ]
-                    ),
-                    outline=False,
-                    color='light',
-                    className="w-100 mb-3",
-                ),
-            ]
-        )
-    ]
+            html.Br(),
+            dcc.Store(id='manager-df-path'),
+            dcc.Store(id='gw-list'),
+            dbc.Input(id="league-id", placeholder="Input League Id...", type="number"),
+            dbc.Button(
+                "Load League Data",
+                color="primary",
+                block=True,
+                id="run-button",
+            ),
+            html.Br(),
+            progress,
+        ]
+    ),
+
 )
 
 
@@ -106,6 +107,12 @@ season_tabs = html.Div(
     ]
 )
 
+control_tabs = dbc.Tabs(
+    [
+        dbc.Tab(about_tab, label="About"),
+        dbc.Tab(input_tab, label="Input"),
+    ]
+)
 
 analysis = html.Div(
     [

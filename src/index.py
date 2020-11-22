@@ -9,8 +9,7 @@ from dash.exceptions import PreventUpdate
 import dash_core_components as dcc
 
 from app import app, DATA_STORE
-from layouts import control, analysis
-from loading_loop import progress
+from layouts import control_tabs, analysis
 from fpl_api_utils import get_bootstrap_static_dataframes
 
 header = dbc.Row(
@@ -39,9 +38,18 @@ app.layout = dbc.Container(
         html.Div(id='data_store_success', style={'display': 'none'}),
         dcc.Store(id="fpl-data-paths"),
         header,
-        control,
-        progress,
-        analysis,
+        dbc.Row(
+            [
+                dbc.Col(
+                    control_tabs,
+                    width=3
+                ),
+                dbc.Col(
+                    analysis,
+                    width=9
+                )
+            ]
+        ),
     ],
     fluid=True
 )
