@@ -55,6 +55,43 @@ input_tab = dbc.Card(
 
 )
 
+league_table = html.Div(
+    [
+        dbc.Row(
+            dbc.Col(
+                html.H1(id='league-name', className='text-center font-weight-bold'),
+                width={'size': 6, 'offset': 3}
+            ),
+        ),
+        dbc.Row(
+            dbc.Col(
+                dbc.Button(
+                    "Display League Table",
+                    id="collapse-button",
+                    className="mb-3 text-center",
+                    color="info",
+                    block=True,
+                ),
+                width={'size': 4, 'offset': 4},
+            ),
+        ),
+        dbc.Row(
+            dbc.Col(
+                dbc.Collapse(
+                    dbc.Card(
+                        dash_table.DataTable(id='league-table', style_as_list_view=True,
+                                             style_cell={'textAlign': 'left', 'color': 'black'},)
+                    ),
+                    id="collapse",
+                ),
+            ),
+            justify='center',
+            className='mb-3'
+        ),
+    ],
+    id='hidden-analysis-div',
+    style={'display': 'none'}
+)
 
 gameweek_tabs = html.Div(
     [
@@ -117,51 +154,16 @@ control_tabs = dbc.Tabs(
 analysis = html.Div(
     [
         dcc.Store(id="fig_store"),
-        html.Div(
-            [
-                dbc.Row(
-                    dbc.Col(
-                        html.H1(id='league-name', className='text-center font-weight-bold'),
-                        width={'size': 6, 'offset': 3}
-                    ),
-                ),
-                dbc.Row(
-                    dbc.Col(
-                        dbc.Button(
-                            "Display League Table",
-                            id="collapse-button",
-                            className="mb-3 text-center",
-                            color="info",
-                            block=True,
-                        ),
-                        width={'size': 4, 'offset': 4},
-                    ),
-                ),
-                dbc.Row(
-                    dbc.Col(
-                        dbc.Collapse(
-                            dbc.Card(
-                                dash_table.DataTable(id='league-table')
-                            ),
-                            id="collapse",
-                        ),
-                    ),
-                    justify='center',
-                    className='mb-3'
-                ),
-            ],
-            id='hidden-analysis-div',
-            style={'display': 'none'}
-        ),
+        league_table,
         dbc.Row(
             dbc.Col(
                 [
                     dbc.Tabs(
                         [
                             dbc.Tab(season_tabs, label="Season Overview", tab_id="season",
-                                    labelClassName="bg-primary text-white"),
+                                    labelClassName="text-white"),
                             dbc.Tab(gameweek_tabs, label='Gameweek Analysis', tab_id='gws',
-                                    labelClassName="bg-primary text-white"),
+                                    labelClassName="text-white"),
                         ],
                         id="master-tabs"
                     ),
