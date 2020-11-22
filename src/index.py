@@ -14,9 +14,23 @@ from loading_loop import progress
 from fpl_api_utils import get_bootstrap_static_dataframes
 
 header = dbc.Row(
-    dbc.Col(
-        html.H1("FPL League Dashboard", className="bg-primary text-center text-white font-weight-bold"),
-    )
+    [
+        dbc.Col(
+            html.H2("FPL League Dashboard", className="font-weight-bold"),
+            width=8,
+        ),
+        dbc.Col(
+            html.A(
+                html.H2("Premier League"),
+                href="https://fantasy.premierleague.com/",
+                className="text-right text-white",
+            ),
+            width=4
+        )
+    ],
+    no_gutters=True,
+    align="center",
+    id="header"
 )
 
 app.layout = dbc.Container(
@@ -28,7 +42,8 @@ app.layout = dbc.Container(
         control,
         progress,
         analysis,
-    ]
+    ],
+    fluid=True
 )
 
 
