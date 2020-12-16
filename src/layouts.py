@@ -141,6 +141,8 @@ season_tabs = html.Div(
             [
                 dbc.Tab(label="League Rankings", tab_id="rank",
                         labelClassName="bg-primary text-white"),
+                dbc.Tab(label="League Points", tab_id="total_points",
+                        labelClassName="bg-primary text-white"),
                 dbc.Tab(label="Manager Points", tab_id="points-box",
                         labelClassName="bg-primary text-white"),
 

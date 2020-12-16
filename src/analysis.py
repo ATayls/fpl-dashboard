@@ -59,7 +59,7 @@ def index_by_element(manager_df, include_subs=True):
     return element_df
 
 
-def create_ranking_df(manager_df):
+def create_ranking_df(manager_df, rank=True):
     """
     Create ranking dataframes given the manager dataframe. One of overall rank and one for rank in each gameweek.
     :param manager_df:
@@ -70,11 +70,12 @@ def create_ranking_df(manager_df):
 
     # Get manager rankings
     running_rank = (manager_df[['manager', 'gw', 'total_points', 'team_name']].set_index('manager')
-                    .pivot(columns='gw', values='total_points')
-                    .rank(ascending=False, method='first'))
+                    .pivot(columns='gw', values='total_points'))
     gw_rank = (manager_df[['manager', 'gw', 'points']].set_index('manager')
-               .pivot(columns='gw', values='points')
-               .rank(ascending=False, method='first'))
+               .pivot(columns='gw', values='points'))
+    if rank:
+        running_rank = running_rank.rank(ascending=False, method='first')
+        gw_rank = gw_rank.rank(ascending=False, method='first')
     running_rank.index = running_rank.index.map(id_to_name)
     gw_rank.index = gw_rank.index.map(id_to_name)
     return running_rank, gw_rank
