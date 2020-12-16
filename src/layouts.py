@@ -18,7 +18,8 @@ from plots import create_graphs
 about_tab = dbc.Card(
     dbc.CardBody(
         [
-            html.H4("League Dashboard"),
+            html.H4("About League Dashboard"),
+            html.Br(),
             html.P(""" This dashboard aims to give you a more complete overview of the activity in your FPL
             league. Input your league id on the Input Tab to load the manager data into the dashboard.
             To find your league id: """),
@@ -146,9 +147,10 @@ season_tabs = html.Div(
 
 control_tabs = dbc.Tabs(
     [
-        dbc.Tab(about_tab, label="About"),
-        dbc.Tab(input_tab, label="Input"),
-    ]
+        dbc.Tab(about_tab, label="About", tab_id="a"),
+        dbc.Tab(input_tab, label="Input", tab_id="i"),
+    ],
+    active_tab="i",
 )
 
 analysis = html.Div(

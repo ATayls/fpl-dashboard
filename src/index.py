@@ -15,17 +15,9 @@ from fpl_api_utils import get_bootstrap_static_dataframes
 header = dbc.Row(
     [
         dbc.Col(
-            html.H2("FPL League Dashboard", className="font-weight-bold"),
-            width=8,
+            html.H2("FPL League Dashboard", className="font-weight-bold text-center"),
+            width=12,
         ),
-        dbc.Col(
-            html.A(
-                html.H2("Premier League"),
-                href="https://fantasy.premierleague.com/",
-                className="text-right text-white",
-            ),
-            width=4
-        )
     ],
     no_gutters=True,
     align="center",
@@ -38,18 +30,18 @@ app.layout = dbc.Container(
         html.Div(id='data_store_success', style={'display': 'none'}),
         dcc.Store(id="fpl-data-paths"),
         header,
-        dbc.Row(
-            [
-                dbc.Col(
-                    control_tabs,
-                    width=3
-                ),
-                dbc.Col(
-                    analysis,
-                    width=9
-                )
-            ]
+        # dbc.Row(
+        #     [
+        dbc.Col(
+            control_tabs,
+            width=12
         ),
+        dbc.Col(
+            analysis,
+            width=12
+        )
+        #     ]
+        # ),
     ],
     fluid=True
 )
