@@ -22,20 +22,20 @@ def league_ranking(running_rank):
     return fig
 
 
-def league_total_points(total_points):
+def league_ts_plot(ts_df, title):
     """
     Plot to show manager overall points over time.
-    :param total_points: df
+    :param ts_df: timeseries df containing a variable measured every gameweek for all managers.
     :return: plotly fig
     """
-    total_points = total_points.sort_values(by=total_points.columns[-1], ascending=True)
+    total_points = ts_df.sort_values(by=ts_df.columns[-1], ascending=True)
     # League rank plot
     fig = go.Figure()
     for row in total_points.iterrows():
         fig.add_trace(go.Scatter(x=row[1].index.to_list(), y=row[1].astype(int).to_list(),
                                  mode='lines+markers',
                                  name=row[0]))
-    fig.update_layout(xaxis_title='GameWeek', yaxis_title='Total Points')
+    fig.update_layout(xaxis_title='GameWeek', yaxis_title=title)
     return fig
 
 
@@ -131,8 +131,8 @@ def create_graphs(manager_df, players_df, gw):
     def id_to_name(player_id):
         return players_df[players_df['id'] == player_id]['web_name'].values[0]
 
-    running_rank, gw_rank = create_ranking_df(manager_df)
-    total_points, gw_points = create_ranking_df(manager_df, rank=False)
+    running_rank = create_ranking_df(manager_df, 'total_points')
+    total_points = create_ranking_df(manager_df, 'total_points', rank=False)
     own_df = ownership(manager_df)
     own_df.index = own_df.index.map(id_to_name)
     element_df = index_by_element(manager_df)
@@ -142,7 +142,7 @@ def create_graphs(manager_df, players_df, gw):
     captains_df = captains_df / captains_df.sum() * 100
 
     rank_fig = league_ranking(running_rank)
-    tpoints_fig = league_total_points(total_points)
+    tpoints_fig = league_ts_plot(total_points, 'Total Points')
     box_fig = manager_box_plot(manager_df)
     own_fig = ownership_bar(own_df, gw)
     cap_fig = captaincy_plot(captains_df)
