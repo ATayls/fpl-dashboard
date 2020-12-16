@@ -51,6 +51,14 @@ input_tab = dbc.Card(
             ),
             html.Br(),
             progress,
+            html.Br(),
+            dcc.RangeSlider(
+                id='gw-slider',
+                min=1,
+                max=39,
+                step=1,
+                value=[1, 39],
+            )
         ]
     ),
 
@@ -241,12 +249,14 @@ def render_tab_content(active_season_tab, active_gw_tab, master_tab, data):
     Output("fig_store", "data"),
     [Input("load-complete", "children"),
      Input("gw-select", "value"),
+     Input("gw-slider", "value"),
      State("fpl-data-paths", "data"),
      State("manager-df-path", "data")]
 )
-def create_figures(loaded, gw, data_paths, df_path):
+def create_figures(loaded, gw, gw_slider, data_paths, df_path):
     if loaded:
         stored_df = pd.read_feather(df_path)
+        stored_df = stored_df[(stored_df['gw']>=min(gw_slider)) & (stored_df['gw']<=max(gw_slider))]
         players_df = pd.read_feather(data_paths['players'])
         return create_graphs(stored_df, players_df, int(gw))
     else:
@@ -255,15 +265,29 @@ def create_figures(loaded, gw, data_paths, df_path):
 
 @app.callback(
     [Output("gw-select", "options"), Output("gw-select", "value")],
-    [Input("gw-list", "data"), State("gw-select","value")]
+    [Input("gw-slider", "value"), State("gw-select", "value")],
 )
-def populate_gw_select(gw_list, current_val):
-    if isinstance(gw_list, list):
-        options = [{'label': f'Gameweek {x}', 'value': str(x)} for x in gw_list]
+def populate_gw_select(slider_vals, current_val):
+    if isinstance(slider_vals, list):
+        options = [{'label': f'Gameweek {x}', 'value': str(x)} for x in range(slider_vals[0], slider_vals[1]+1)]
         if current_val is None:
-            value = gw_list[-1]
+            value = slider_vals[1]
+        elif int(current_val) > slider_vals[1]:
+            value = slider_vals[1]
+        elif int(current_val) < slider_vals[0]:
+            value = slider_vals[0]
         else:
-            value = current_val
+            value = int(current_val)
         return options, value
+    else:
+        raise PreventUpdate
+
+@app.callback(
+    [Output("gw-slider", "max"), Output("gw-slider", "value"), Output("gw-slider", "marks")],
+    [Input("gw-list", "data")]
+)
+def populate_gw_slider(gw_list):
+    if isinstance(gw_list, list):
+        return max(gw_list), [1, max(gw_list)], {x: {'label': f'GW{x}', 'style': {'color': '#ffffff'}} for x in gw_list}
     else:
         raise PreventUpdate
