@@ -133,6 +133,7 @@ def create_graphs(manager_df, players_df, gw):
 
     running_rank = create_ranking_df(manager_df, 'total_points')
     total_points = create_ranking_df(manager_df, 'total_points', rank=False)
+    team_value = create_ranking_df(manager_df, 'value', rank=False)
     own_df = ownership(manager_df)
     own_df.index = own_df.index.map(id_to_name)
     element_df = index_by_element(manager_df)
@@ -143,6 +144,7 @@ def create_graphs(manager_df, players_df, gw):
 
     rank_fig = league_ranking(running_rank)
     tpoints_fig = league_ts_plot(total_points, 'Total Points')
+    tvalue_fig = league_ts_plot(team_value, 'Team Value')
     box_fig = manager_box_plot(manager_df)
     own_fig = ownership_bar(own_df, gw)
     cap_fig = captaincy_plot(captains_df)
@@ -151,4 +153,5 @@ def create_graphs(manager_df, players_df, gw):
     man_corr_fig = manager_corr_heatmap(manager_corr)
 
     return {'rank': rank_fig, 'points-box': box_fig, 'prc-own': own_fig, 'captains': cap_fig,
-            'trans-in': trans_in, 'trans-out': trans_out, 'man-corr': man_corr_fig, 'total_points':tpoints_fig}
+            'trans-in': trans_in, 'trans-out': trans_out, 'man-corr': man_corr_fig,
+            'total_points':tpoints_fig, 'team-value':tvalue_fig}
